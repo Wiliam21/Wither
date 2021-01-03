@@ -29,6 +29,7 @@ public:
     void printCaminos(int, lista, int, lista);
     lista getNextMoves(int, int);
     void fillWays();
+    bool ValidarPosicion(int, int);
 };
 
 void Chess::initChess(Jugador p)
@@ -85,7 +86,7 @@ void Chess::inicio()
 {
     int q0 = jugador.posicion;
     list<int> temp;
-    printCaminos(q0, getNextMoves(q0, 0), 1, temp);
+    printCaminos(q0, getNextMoves(q0, 0), 0, temp);
 }
 
 void Chess::printCaminos(int actual, list<int> moves, int cont, list<int> camino)
@@ -135,83 +136,80 @@ void Chess::printCaminos(int actual, list<int> moves, int cont, list<int> camino
     }
     else
     {
-        for (int it : camino)
+        for (int it : moves)
         {
-            printCaminos(it, getNextMoves(it, cont), cont + 1, camino);
+            printCaminos(it, getNextMoves(it, cont+1), cont + 1, camino);
         }
     }
 }
 void Chess::fillWays()
 {
     //caminos de R first llave, second valor
-    for (map<int, char>::iterator it = colorCell.begin(); it != colorCell.end(); ++it)
+    for (int i = 0; i < ROWS_NUM; i++)
     {
-        list<int> m, h;
-        //diagonales
-
-        if (it->first - 5 > 0)
+        for (int j = 0; j < ROWS_NUM; j++)
         {
-            m.push_back(it->first - 5);
-        }
-        if (it->first + 5 <= 16)
-        {
-            m.push_back(it->first + 5);
-        }
-
-        if (it->first - 3 > 0)
-        {
-            m.push_back(it->first - 3);
-        }
-        if (it->first + 3 <= 16)
-        {
-            m.push_back(it->first + 3);
-        }
-        //ortogonales
-
-        if (it->first - 1 > 0)
-        {
-            h.push_back(it->first - 1);
-        }
-        if (it->first + 1 <= 16)
-        {
-            h.push_back(it->first + 1);
-        }
-
-        if (it->first - 4 > 0)
-        {
-            h.push_back(it->first - 4);
-        }
-        if (it->first + 4 <= 16)
-        {
-            h.push_back(it->first + 4);
-        }
-        if (it->second == 'r')
-        {
-            movesToB[it->first] = m;
-            movesToR[it->first] = h;
-        }
-        else
-        {
-            movesToB[it->first] = h;
-            movesToR[it->first] = m;
+            lista d,h;
+            if (ValidarPosicion(i - 1, j - 1))
+            {
+                d.push_back(squareBoard[i - 1][j - 1].getNumber());
+            }
+            if (ValidarPosicion(i, j - 1))
+            {
+                h.push_back(squareBoard[i][j - 1].getNumber());
+            }
+            if (ValidarPosicion(i - 1, j))
+            {
+                h.push_back(squareBoard[i - 1][j].getNumber());
+            }
+            if (ValidarPosicion(i + 1, j + 1))
+            {
+                d.push_back(squareBoard[i + 1][j + 1].getNumber());
+            }
+            if (ValidarPosicion(i, j + 1))
+            {
+                h.push_back(squareBoard[i][j + 1].getNumber());
+            }
+            if (ValidarPosicion(i + 1, j))
+            {
+                h.push_back(squareBoard[i + 1][j].getNumber());
+            }
+            if (ValidarPosicion(i - 1, j + 1))
+            {
+                d.push_back(squareBoard[i - 1][j + 1].getNumber());
+            }
+            if (ValidarPosicion(i + 1, j - 1))
+            {
+                d.push_back(squareBoard[i + 1][j - 1].getNumber());
+            }
+            if (squareBoard[i][j].getColor() == 'r')
+            {
+                movesToR[squareBoard[i][j].getNumber()] = d;
+                movesToB[squareBoard[i][j].getNumber()] = h;
+            }
+            else
+            {
+                movesToR[squareBoard[i][j].getNumber()] = h;
+                movesToB[squareBoard[i][j].getNumber()] = d;
+            }
         }
     }
-    cout << "movimientos para B" << endl;
-    for (map<int, lista>::iterator it = movesToB.begin(); it != movesToB.end(); ++it)
-    {
-        cout << it->first << " : ";
-        for (int x : it->second)
-            cout << x << " ";
-        cout << endl;
-    }
-    cout << "Movimientos para R" << endl;
-    for (map<int, lista>::iterator it = movesToR.begin(); it != movesToR.end(); ++it)
-    {
-        cout << it->first << " : ";
-        for (int x : it->second)
-            cout << x << " ";
-        cout << endl;
-    }
+    // cout << "movimientos para B" << endl;
+    // for (map<int, lista>::iterator it = movesToB.begin(); it != movesToB.end(); ++it)
+    // {
+    //     cout << it->first << " : ";
+    //     for (int x : it->second)
+    //         cout << x << " ";
+    //     cout << endl;
+    // }
+    // cout << "Movimientos para R" << endl;
+    // for (map<int, lista>::iterator it = movesToR.begin(); it != movesToR.end(); ++it)
+    // {
+    //     cout << it->first << " : ";
+    //     for (int x : it->second)
+    //         cout << x << " ";
+    //     cout << endl;
+    // }
 }
 list<int> Chess::getNextMoves(int casilla, int letra)
 {
@@ -223,4 +221,25 @@ list<int> Chess::getNextMoves(int casilla, int letra)
     {
         return movesToB[casilla];
     }
+}
+
+bool Chess::ValidarPosicion(int i, int j)
+{
+    if (i < 0)
+    {
+        return false;
+    }
+    if (i >= ROWS_NUM)
+    {
+        return false;
+    }
+    if (j < 0)
+    {
+        return false;
+    }
+    if (j >= ROWS_NUM)
+    {
+        return false;
+    }
+    return true;
 }
